@@ -9,6 +9,7 @@ export class MeasurementCategory {
         public id: number,
         public name: string,
         public unit: string,
+        public group: string,
         entries?: MeasurementEntry[]
     ) {
         if (entries) {
@@ -33,7 +34,8 @@ class MeasurementCategoryAdapter implements Adapter<MeasurementCategory> {
         return new MeasurementCategory(
             item.id,
             item.name,
-            item.unit
+            item.unit,
+            item.group
         );
     }
 
@@ -42,6 +44,7 @@ class MeasurementCategoryAdapter implements Adapter<MeasurementCategory> {
             id: item.id,
             name: item.name,
             unit: item.unit,
+            group: item.group
         };
     }
 }

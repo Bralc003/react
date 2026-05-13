@@ -90,6 +90,7 @@ export const getMeasurementCategory = async (id: number): Promise<MeasurementCat
 export interface AddMeasurementCategoryParams {
     name: string;
     unit: string;
+    group_name: string;
 }
 
 export const addMeasurementCategory = async (data: AddMeasurementCategoryParams): Promise<MeasurementCategory> => {
@@ -97,7 +98,8 @@ export const addMeasurementCategory = async (data: AddMeasurementCategoryParams)
         makeUrl(API_MEASUREMENTS_CATEGORY_PATH,),
         {
             name: data.name,
-            unit: data.unit
+            unit: data.unit,
+            group_name: data.group_name,
         },
         { headers: makeHeader() }
     );

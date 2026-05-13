@@ -17,6 +17,11 @@ export const CategoryForm = ({ category, closeFn }: CategoryFormProps) => {
     const useAddCategoryQuery = useAddMeasurementCategoryQuery();
     const useEditCategoryQuery = useEditMeasurementCategoryQuery(category?.id || 0);
     const validationSchema = yup.object({
+        group: yup
+            .string()
+            .required(t('forms.fieldRequired'))
+            .max(20, t('forms.maxLength', { chars: '20' }))
+            .min(3, t('forms.minLength', { chars: '3' })),
         name: yup
             .string()
             .required(t('forms.fieldRequired'))
@@ -32,17 +37,23 @@ export const CategoryForm = ({ category, closeFn }: CategoryFormProps) => {
     return (
         <Formik
             initialValues={{
+                group: category ? category.group : "",
                 name: category ? category.name : "",
                 unit: category ? category.unit : "",
+                
             }}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
-
+                const payload = {
+                    name: values.name,
+                    unit: values.unit,
+                    group_name: values.group,
+                };
                 // Edit existing weight entry
                 if (category) {
-                    useEditCategoryQuery.mutate({ ...values, id: category.id });
+                    useEditCategoryQuery.mutate({ ...payload, id: category.id });
                 } else {
-                    useAddCategoryQuery.mutate(values);
+                    useAddCategoryQuery.mutate(payload);
                 }
 
                 // if closeFn is defined, close the modal (this form does not have to
@@ -55,6 +66,14 @@ export const CategoryForm = ({ category, closeFn }: CategoryFormProps) => {
             {formik => (
                 <Form>
                     <Stack spacing={2}>
+                        <TextField
+                            fullWidth
+                            id="group"
+                            label={t('Group')}
+                            error={formik.touched.group && Boolean(formik.touched.group)}
+                            helperText={formik.touched.group && formik.errors.group}
+                            {...formik.getFieldProps('group')}
+                        />
                         <TextField
                             fullWidth
                             id="name"
