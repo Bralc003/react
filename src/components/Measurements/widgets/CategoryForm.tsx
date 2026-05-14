@@ -37,7 +37,7 @@ export const CategoryForm = ({ category, closeFn }: CategoryFormProps) => {
     return (
         <Formik
             initialValues={{
-                group: category ? category.group : "",
+                group: category ? category.group_name : "",
                 name: category ? category.name : "",
                 unit: category ? category.unit : "",
                 
@@ -47,7 +47,7 @@ export const CategoryForm = ({ category, closeFn }: CategoryFormProps) => {
                 const payload = {
                     name: values.name,
                     unit: values.unit,
-                    group_name: values.group,
+                    group: values.group,
                 };
                 // Edit existing weight entry
                 if (category) {

@@ -90,7 +90,7 @@ export const getMeasurementCategory = async (id: number): Promise<MeasurementCat
 export interface AddMeasurementCategoryParams {
     name: string;
     unit: string;
-    group_name: string;
+    group: string;
 }
 
 export const addMeasurementCategory = async (data: AddMeasurementCategoryParams): Promise<MeasurementCategory> => {
@@ -99,7 +99,7 @@ export const addMeasurementCategory = async (data: AddMeasurementCategoryParams)
         {
             name: data.name,
             unit: data.unit,
-            group_name: data.group_name,
+            group: data.group,
         },
         { headers: makeHeader() }
     );
@@ -178,4 +178,23 @@ export const addMeasurementEntry = async (data: AddMeasurementParams): Promise<M
     );
 
     return MeasurementEntry.fromJson(response.data);
+};
+
+export const getMeasurementGroups = async (): Promise<CategoryGroup[]> => {
+
+    const groups: CategoryGroup[] = [];
+
+    const groupUrl = makeUrl(API_MEASUREMENTS_GROUP_PATH, {
+        query: {
+            limit: API_MAX_PAGE_SIZE,
+        }
+    });
+
+    for await (const page of fetchPaginated(groupUrl, makeHeader())) {
+        for (const groupData of page) {
+            groups.push(CategoryGroup.fromJson(groupData));
+        }
+    }
+
+    return groups;
 };

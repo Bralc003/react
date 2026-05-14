@@ -1,6 +1,6 @@
 import React from "react";
-import { Button, Card, CardActions, CardContent, CardHeader, IconButton, Stack, } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
+import { Button, Card, CardActions, CardContent, CardHeader, IconButton, Stack } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 import { LoadingPlaceholder } from "@/core/ui/LoadingWidget/LoadingWidget";
 import { useMeasurementsCategoryQuery } from "@/components/Measurements/queries";
@@ -14,51 +14,83 @@ import { Link } from "react-router-dom";
 import { EntryForm } from "@/components/Measurements/widgets/EntryForm";
 import { WgerModal } from "@/core/ui/Modals/WgerModal";
 
-
 export const CategoryList = (props: { category: MeasurementCategory }) => {
-
     const [t, i18n] = useTranslation();
     const [openModal, setOpenModal] = React.useState(false);
     const handleOpenModal = () => setOpenModal(true);
     const handleCloseModal = () => setOpenModal(false);
 
-    return <>
-        <Card>
-            <CardHeader title={props.category.name} subheader={props.category.unit} />
-            <CardContent>
-                <MeasurementChart category={props.category} />
-            </CardContent>
-            <CardActions disableSpacing sx={{ justifyContent: "space-between" }}>
-                <Button size="small">
-                    <Link to={makeLink(WgerLink.MEASUREMENT_DETAIL, i18n.language, { id: props.category.id })}>
-                        {t("seeDetails")}
-                    </Link>
-                </Button>
+    return (
+        <>
+            <Card>
+                <CardHeader title={props.category.name} subheader={props.category.unit} />
+                <CardContent>
+                    <MeasurementChart category={props.category} />
+                </CardContent>
+                <CardActions disableSpacing sx={{ justifyContent: "space-between" }}>
+                    <Button size="small">
+                        <Link to={makeLink(WgerLink.MEASUREMENT_DETAIL, i18n.language, { id: props.category.id })}>
+                            {t("seeDetails")}
+                        </Link>
+                    </Button>
 
-                <IconButton onClick={handleOpenModal}>
-                    <AddIcon />
-                </IconButton>
-            </CardActions>
-        </Card>
-        <WgerModal title={t('add')} isOpen={openModal} closeFn={handleCloseModal}>
-            <EntryForm closeFn={handleCloseModal} categoryId={props.category.id} />
-        </WgerModal>
-    </>;
+                    <IconButton onClick={handleOpenModal}>
+                        <AddIcon />
+                    </IconButton>
+                </CardActions>
+            </Card>
+            <WgerModal title={t("add")} isOpen={openModal} closeFn={handleCloseModal}>
+                <EntryForm closeFn={handleCloseModal} categoryId={props.category.id} />
+            </WgerModal>
+        </>
+    );
 };
 
 export const MeasurementCategoryOverview = () => {
     const categoryQuery = useMeasurementsCategoryQuery();
     const [t] = useTranslation();
 
-    return categoryQuery.isLoading
-        ? <LoadingPlaceholder />
-        : <WgerContainerRightSidebar
+    return categoryQuery.isLoading ? (
+        <LoadingPlaceholder />
+    ) : (
+        <WgerContainerRightSidebar
             title={t("measurements.measurements")}
-            mainContent={<Stack spacing={2}>
-                {categoryQuery.data!.length === 0 && <OverviewEmpty />}
-                {categoryQuery.data!.map(c => <CategoryList category={c} key={c.id} />)}
-            </Stack>
+            mainContent={
+                <Stack spacing={2}>
+                    {categoryQuery.data!.length === 0 && <OverviewEmpty />}
+                    {groupById(categoryQuery.data!).map((group) => (
+                        <div key={group.groupName}>
+                            <h1>{group.groupName}</h1>
+
+                            <Stack spacing={2}>
+                                {group.categories.map((c) => (
+                                    <CategoryList key={c.id} category={c} />
+                                ))}
+                            </Stack>
+                        </div>
+                    ))}
+                </Stack>
             }
             fab={<AddMeasurementCategoryFab />}
-        />;
+        />
+    );
 };
+
+function groupById(categories: MeasurementCategory[]) {
+    const map = new Map<string, MeasurementCategory[]>();
+
+    categories.forEach((c) => {
+        const key = c.group_name;
+
+        if (!map.has(key)) {
+            map.set(key, []);
+        }
+
+        map.get(key)!.push(c);
+    });
+
+    return Array.from(map.entries()).map(([groupName, categories]) => ({
+        groupName,
+        categories,
+    }));
+}
